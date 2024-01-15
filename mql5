@@ -1,0 +1,67 @@
+
+// Trend Monitor VZ MT5
+// Developer: Forex Robot Easy Team
+// Developer's Site: forexroboteasy.com
+
+// Description: This trading robot uses the Elliott Wave Theory and the Valable ZigZag Indicator to accurately gauge market trends and provide traders with valuable information.
+
+// Include necessary libraries
+#include <Trade\Trade.mqh>
+#include <Technical\ZigZag.mqh>
+
+// Define constants
+#define SYMBOL 'EURUSD' // Symbol to trade
+#define LOT_SIZE 0.1 // Lot size for trading
+
+// Initialize global variables
+CTrade trade; // Trade object
+CZigZag zz; // ZigZag object
+int prevWaveDirection = 0; // Previous wave direction
+
+// OnInit() function - Entry point of the program
+void OnInit()
+{
+   // Set up ZigZag indicator
+   zz.Create(); // Create ZigZag indicator
+   zz.SetDepth(10); // Set depth parameter
+   zz.SetDeviation(5); // Set deviation parameter
+   zz.SetBackstep(3); // Set backstep parameter
+}
+
+// OnTick() function - Called on each tick
+void OnTick()
+{
+   // Calculate current wave structure
+   int waveDirection = zz.CalculateWaveDirection(SYMBOL, 0); // Calculate wave direction based on ZigZag indicator
+   
+   // Check if wave direction has changed
+   if (waveDirection != prevWaveDirection)
+   {
+      prevWaveDirection = waveDirection; // Update previous wave direction
+      
+      // Determine trend direction
+      string trendDirection;
+      if (waveDirection == -1)
+         trendDirection = 'Downward';
+      else if (waveDirection == 1)
+         trendDirection = 'Upward';
+      else
+         trendDirection = 'Sideways';
+      
+      // Print trend direction on the chart
+      Print('Current Trend Direction: ', trendDirection);
+      
+      // Place a trade based on the trend direction
+      if (waveDirection == -1)
+         trade.Sell(SYMBOL, LOT_SIZE); // Sell order
+      else if (waveDirection == 1)
+         trade.Buy(SYMBOL, LOT_SIZE); // Buy order
+   }
+}
+
+// OnDeinit() function - Called on program termination
+void OnDeinit(const int reason)
+{
+   trade.PositionCloseAll(); // Close all open positions
+}
+
